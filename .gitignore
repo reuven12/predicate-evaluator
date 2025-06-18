@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environment folders
+.venv/
+venv/
+
+# pytest and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VSCode editor settings
+.vscode/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+
+# Docker-related
+*.pid
+*.sock

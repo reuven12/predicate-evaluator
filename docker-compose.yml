@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  predicate-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      target: app
+    container_name: predicate-app
+    environment:
+      - PREDICATE_SERVICE_URL=${PREDICATE_SERVICE_URL}
+
+  flask-server:
+    build:
+      context: ./flask_server
+    container_name: flask-server
+
+  predicate-tests:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      target: test
+    container_name: predicate-tests
+    depends_on:
+      - predicate-app
