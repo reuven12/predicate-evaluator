@@ -5,9 +5,10 @@ from predicate_data import ETAG_VERSION, PREDICATE_JSON, OPERATORS, CONDITION_TY
 
 logger = logging.getLogger(__name__)
 
-def update_predicate_loop():
+def update_predicate_loop() -> None:
     while True:
         time.sleep(120)
+
         ETAG_VERSION[0] += 1
         version = ETAG_VERSION[0]
 
@@ -16,7 +17,7 @@ def update_predicate_loop():
         condition_type = CONDITION_TYPES[version % len(CONDITION_TYPES)]
 
         PREDICATE_JSON[0] = {
-            "feature": ".x.y",
+            "feature": ".x.y.z",
             "operation": {
                 "operator": operator,
                 "operations": [
@@ -27,8 +28,10 @@ def update_predicate_loop():
         }
 
         logger.info(
-            f"[Flask] Updated predicate: ({operator}) + condition={condition_type}, operand={operand}, ETag=v{version}"
+            f"[Flask] Updated predicate: (operator={operator}) "
+            f"condition={condition_type}, operand={operand}, ETag=v{version}"
         )
 
-def start_updater():
+def start_updater() -> None:
+    """Starts the background thread that updates the predicate periodically."""
     threading.Thread(target=update_predicate_loop, daemon=True).start()

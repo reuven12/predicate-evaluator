@@ -30,5 +30,5 @@ def parse_operation(op_dict: Dict[str, Any]) -> Operation:
 
     try:
         return _OPERATION_FACTORY[op_type](op_dict)
-    except KeyError:                       # should never occur
+    except KeyError:
         raise PredicateError(f"No factory for operator {op_type}")
