@@ -9,11 +9,15 @@ services:
     container_name: predicate-app
     environment:
       - PREDICATE_SERVICE_URL=${PREDICATE_SERVICE_URL}
+    depends_on:
+      - flask-server
+    restart: unless-stopped
 
   flask-server:
     build:
       context: ./flask_server
     container_name: flask-server
+    restart: unless-stopped
 
   predicate-tests:
     build:

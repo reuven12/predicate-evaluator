@@ -2,6 +2,7 @@
 FROM python:3.11-slim AS base
 
 WORKDIR /app
+ENV PYTHONUNBUFFERED=1
 
 # Install runtime dependencies
 COPY requirements.txt .
