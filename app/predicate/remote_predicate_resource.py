@@ -1,7 +1,6 @@
 import os
 import asyncio
 import aiohttp
-import json
 import logging
 from typing import Optional
 
@@ -26,7 +25,6 @@ class RemotePredicateResource:
 
         resource = cls(base_url)
         asyncio.create_task(resource._update_loop())
-
         await resource._loaded_once_future
         return resource
 
