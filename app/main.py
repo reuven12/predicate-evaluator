@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 from types import SimpleNamespace
-from typing import List, Optional
+from typing import List
 
 from predicate.logging_config import configure_logging
 from predicate.remote_predicate_resource import RemotePredicateResource
@@ -22,30 +22,22 @@ def build_namespace_from_path(path: str, value: object) -> SimpleNamespace:
 async def main() -> None:
     logger.info("🔄 Initialising RemotePredicateResource …")
     resource = await RemotePredicateResource.from_env()
-
-    last_predicate_dict: Optional[dict] = None
+    queue = resource.get_update_queue()
 
     try:
         while True:
-            predicate = resource.predicate
-            if predicate:
-                current_predicate_dict = predicate.to_dict()
+            predicate = await queue.get()
 
-                if current_predicate_dict != last_predicate_dict:
-                    logger.info("📜 Current predicate:\n%s", json.dumps(current_predicate_dict, indent=2))
-                    last_predicate_dict = current_predicate_dict
+            predicate_dict = predicate.to_dict()
+            logger.info("📜 Updated predicate:\n%s", json.dumps(predicate_dict, indent=2))
 
-                feature_path = predicate.feature
-                test_value = 20
+            feature_path = predicate.feature
+            test_value = 20
 
-                obj = build_namespace_from_path(feature_path, test_value)
-                result = predicate.evaluate(obj)
+            obj = build_namespace_from_path(feature_path, test_value)
+            result = predicate.evaluate(obj)
 
-                logger.info(f"🔍 Evaluated {feature_path} = {test_value} → ✅ {result}")
-            else:
-                logger.warning("⏳ Predicate not yet loaded")
-
-            await asyncio.sleep(30)
+            logger.info(f"🔍 Evaluated {feature_path} = {test_value} → ✅ {result}")
 
     except asyncio.CancelledError:
         pass

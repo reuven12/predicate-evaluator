@@ -3,9 +3,10 @@ import asyncio
 import aiohttp
 import logging
 from typing import Optional
+from asyncio import Queue
 
 from .predicate import Predicate
-from .exceptions import PredicateError, RemotePredicateFetchError
+from .exceptions import RemotePredicateFetchError
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class RemotePredicateResource:
         self._predicate: Optional[Predicate] = None
         self._lock = asyncio.Lock()
         self._loaded_once_future = asyncio.get_event_loop().create_future()
+        self._predicate_queue: Queue[Predicate] = Queue()
 
     @classmethod
     async def from_env(cls) -> "RemotePredicateResource":
@@ -31,6 +33,9 @@ class RemotePredicateResource:
     @property
     def predicate(self) -> Optional[Predicate]:
         return self._predicate
+
+    def get_update_queue(self) -> Queue:
+        return self._predicate_queue
 
     async def _update_loop(self) -> None:
         while True:
@@ -59,8 +64,10 @@ class RemotePredicateResource:
                 new_predicate = Predicate.from_json(text)
 
                 async with self._lock:
+                    if self._predicate and self._predicate.to_dict() == new_predicate.to_dict():
+                        return
                     self._predicate = new_predicate
+                    await self._predicate_queue.put(new_predicate)
+
                     if not self._loaded_once_future.done():
                         self._loaded_once_future.set_result(True)
-
-                logger.info("Predicate fetched and updated successfully.")
